@@ -1,3 +1,17 @@
+# 6.1.6
+__fixed__
+- Fix sighash treatment when signing taproot script sign scripts using Psbt (#2104)
+- Fix error for invalid scripts in toASM (#2097)
+- Fix mutation of input to addOutput method on Psbt (#2091)
+
+# 6.1.5
+__fixed__
+- Updated bip174 dependency to fix issue with unknownKeyVals. (#1979)
+
+# 6.1.4
+__changed__
+- Changed internal usage of the Buffer API to match with newer broken bundlers that don't follow spec. The new usage is still compatible with older versions of Buffer, so there shouldn't be any breakage. The public API interface was not changed. (#1975)
+
 # 6.1.3
 __fixed__
 - validateSignaturesOfInput for taproot inputs returned false for valid signatures in specific cases. (#1934)
@@ -319,18 +333,18 @@ __fixed__
 
 # 2.1.0
 From this release users should use the HDNode directly (compared to accessing `.keyPair`) when performing ECDSA operations such as `sign` or `verify`.
-Ideally you shoud not have to directly access `HDNode` internals for general usage,  as it can often be confusing and error prone.
+Ideally you should not have to directly access `HDNode` internals for general usage,  as it can often be confusing and error prone.
 
 __added__
 - `ECPair.prototype.getNetwork`
-- `HDNode.prototype.getNetwork`, wraps the underyling keyPair's `getNetwork` method
-- `HDNode.prototype.getPublicKeyBuffer`, wraps the underyling keyPair's `getPublicKeyBuffer` method
+- `HDNode.prototype.getNetwork`, wraps the underlying keyPair's `getNetwork` method
+- `HDNode.prototype.getPublicKeyBuffer`, wraps the underlying keyPair's `getPublicKeyBuffer` method
 - `HDNode.prototype.sign`, wraps the underlying keyPair's `sign` method
 - `HDNode.prototype.verify`, wraps the underlying keyPair's `verify` method
 
 
 # 2.0.0
-In this release we have strived to simplify the API,  [using native types](https://github.com/bitcoinjs/bitcoinjs-lib/issues/407) wherevever possible to encourage cross-compatibility with other open source community modules.
+In this release we have strived to simplify the API,  [using native types](https://github.com/bitcoinjs/bitcoinjs-lib/issues/407) wherever possible to encourage cross-compatibility with other open source community modules.
 
 The `ecdsa` module has been removed in lieu of using a new ECDSA module (for performance and safety reasons) during the `2.x.y` major release.
 Several other cumbersome modules have been removed,  with their new independent modules recommended for usage instead for greater modularity in your projects.
