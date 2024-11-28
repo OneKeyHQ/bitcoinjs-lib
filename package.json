@@ -63,6 +63,7 @@
     "src"
   ],
   "dependencies": {
+    "big-integer": "1.6.51",
     "@noble/hashes": "^1.2.0",
     "bech32": "^2.0.0",
     "bip174": "^3.0.0-rc.0",

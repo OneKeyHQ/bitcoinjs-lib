@@ -6,6 +6,9 @@
  * file LICENSE or http://www.opensource.org/licenses/mit-license.php.
  */
 
+// @ts-ignore
+import bigInt from 'big-integer';
+import { BigInteger } from 'big-integer';
 import * as base32 from './base32';
 import { convertBits } from './convertBits';
 import * as validation from './validation';
@@ -144,12 +147,11 @@ function prefixToUint5Array(prefix: string): Uint8Array {
  * @param {BigInteger} checksum Computed checksum.
  * @returns {Uint8Array}
  */
-function checksumToUint5Array(checksum: bigint): Uint8Array {
+function checksumToUint5Array(checksum: BigInteger): Uint8Array {
   const result = new Uint8Array(8);
   for (let i = 0; i < 8; ++i) {
-    // 使用 BigInt 的位运算操作符
-    result[7 - i] = Number(checksum & 31n);
-    checksum = checksum >> 5n;
+    result[7 - i] = checksum.and(31).toJSNumber();
+    checksum = checksum.shiftRight(5);
   }
   return result;
 }
@@ -312,25 +314,21 @@ function concat(a: Uint8Array, b: Uint8Array): Uint8Array {
  * @param {Uint8Array} data Array of 5-bit integers over which the checksum is to be computed.
  * @returns {BigInteger}
  */
-function polymod(data: Uint8Array): bigint {
+function polymod(data: Uint8Array): BigInteger {
   const GENERATOR = [
-    0x98f2bc8e61n,
-    0x79b76d99e2n,
-    0xf33e5fb3c4n,
-    0xae2eabe2a8n,
-    0x1e4f43e470n,
+    0x98f2bc8e61, 0x79b76d99e2, 0xf33e5fb3c4, 0xae2eabe2a8, 0x1e4f43e470,
   ];
-  let checksum = 1n;
+  let checksum = bigInt(1);
   for (const value of data) {
-    const topBits = checksum >> 35n;
-    checksum = ((checksum & 0x07fffffffffn) << 5n) ^ BigInt(value);
+    const topBits = checksum.shiftRight(35);
+    checksum = checksum.and(0x07ffffffff).shiftLeft(5).xor(value);
     for (let j = 0; j < GENERATOR.length; ++j) {
-      if (((topBits >> BigInt(j)) & 1n) === 1n) {
-        checksum = checksum ^ GENERATOR[j];
+      if (topBits.shiftRight(j).and(1).equals(1)) {
+        checksum = checksum.xor(GENERATOR[j]);
       }
     }
   }
-  return checksum ^ 1n;
+  return checksum.xor(1);
 }
 
 /**
@@ -345,7 +343,7 @@ function polymod(data: Uint8Array): bigint {
 function validChecksum(prefix: string, payload: Uint8Array): boolean {
   const prefixData = concat(prefixToUint5Array(prefix), new Uint8Array(1));
   const checksumData = concat(prefixData, payload);
-  return polymod(checksumData) === 0n;
+  return polymod(checksumData).equals(0);
 }
 
 /**

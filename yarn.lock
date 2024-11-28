@@ -605,6 +605,11 @@ better-npm-audit@^3.7.3:
     semver "^7.6.3"
     table "^6.7.1"
 
+big-integer@1.6.51:
+  version "1.6.51"
+  resolved "https://registry.yarnpkg.com/big-integer/-/big-integer-1.6.51.tgz#0df92a5d9880560d3ff2d5fd20245c889d130686"
+  integrity sha512-GPEid2Y9QU1Exl1rpO9B2IPJGHPSupF5GnVIP0blYvNOMer2bTvSWs1jGOUg04hTmu67nmLsQ9TBo1puaotBHg==
+
 binary-extensions@^2.0.0:
   version "2.3.0"
   resolved "https://registry.yarnpkg.com/binary-extensions/-/binary-extensions-2.3.0.tgz#f6e14a97858d327252200242d4ccfe522c445522"
@@ -656,6 +661,7 @@ bitcoinjs-lib@.:
   dependencies:
     "@noble/hashes" "^1.2.0"
     bech32 "^2.0.0"
+    big-integer "1.6.51"
     bip174 "^3.0.0-rc.0"
     bs58check "^4.0.0"
     uint8array-tools "^0.0.9"

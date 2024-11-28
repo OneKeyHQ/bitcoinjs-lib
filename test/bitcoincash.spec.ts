@@ -1,10 +1,7 @@
 import * as assert from 'assert';
-import * as payments from '../src/payments';
+import { payments, networks as NETWORKS, Transaction, Psbt } from 'bitcoinjs-lib'
 import { ECPairFactory } from 'ecpair';
 import * as ecc from 'tiny-secp256k1';
-import * as NETWORKS from '../src/networks';
-import { Transaction } from '../src/transaction';
-import { Psbt } from '../src/psbt';
 
 const ECPair = ECPairFactory(ecc);
 
@@ -33,13 +30,13 @@ describe('Psbt for Bitcoin Cash', function () {
         sequence: Transaction.DEFAULT_SEQUENCE,
         witnessUtxo: {
           script: spk,
-          value,
+          value: BigInt(value),
         },
         sighashType: hashType, // This is how you tell Psbt it is forkid!!!
       })
       .addOutput({
         address: 'bchtest:qrxjnnyhsfkrw2q6ccfsrex4a5m5wuzc2c92xdq49x',
-        value,
+        value: BigInt(value),
       })
       .signInput(0, keyPair)
       .finalizeAllInputs()

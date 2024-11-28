@@ -560,7 +560,7 @@ class Transaction {
       v.tuple([
         types.UInt32Schema,
         types.BufferSchema,
-        /* types.UInt8 */ v.number(),
+        types.SatoshiSchema,
         types.UInt53Schema,
       ]),
       [inIndex, prevOutScript, inAmount, hashType],
@@ -587,7 +587,7 @@ class Transaction {
       v.tuple([
         types.UInt32Schema,
         types.BufferSchema,
-        /* types.UInt8 */ v.number(),
+        types.SatoshiSchema,
         types.UInt53Schema,
       ]),
       [inIndex, prevOutScript, inAmount, hashType],

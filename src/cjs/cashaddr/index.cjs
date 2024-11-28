@@ -62,10 +62,17 @@ var __importStar =
       return result;
     };
   })();
+var __importDefault =
+  (this && this.__importDefault) ||
+  function (mod) {
+    return mod && mod.__esModule ? mod : { default: mod };
+  };
 Object.defineProperty(exports, '__esModule', { value: true });
 exports.VALID_PREFIXES = exports.ValidationError = void 0;
 exports.encode = encode;
 exports.decode = decode;
+// @ts-ignore
+const big_integer_1 = __importDefault(require('big-integer'));
 const base32 = __importStar(require('./base32'));
 const convertBits_1 = require('./convertBits');
 const validation = __importStar(require('./validation'));
@@ -194,9 +201,8 @@ function prefixToUint5Array(prefix) {
 function checksumToUint5Array(checksum) {
   const result = new Uint8Array(8);
   for (let i = 0; i < 8; ++i) {
-    // 使用 BigInt 的位运算操作符
-    result[7 - i] = Number(checksum & 31n);
-    checksum = checksum >> 5n;
+    result[7 - i] = checksum.and(31).toJSNumber();
+    checksum = checksum.shiftRight(5);
   }
   return result;
 }
@@ -355,23 +361,19 @@ function concat(a, b) {
  */
 function polymod(data) {
   const GENERATOR = [
-    0x98f2bc8e61n,
-    0x79b76d99e2n,
-    0xf33e5fb3c4n,
-    0xae2eabe2a8n,
-    0x1e4f43e470n,
+    0x98f2bc8e61, 0x79b76d99e2, 0xf33e5fb3c4, 0xae2eabe2a8, 0x1e4f43e470,
   ];
-  let checksum = 1n;
+  let checksum = (0, big_integer_1.default)(1);
   for (const value of data) {
-    const topBits = checksum >> 35n;
-    checksum = ((checksum & 0x07fffffffffn) << 5n) ^ BigInt(value);
+    const topBits = checksum.shiftRight(35);
+    checksum = checksum.and(0x07ffffffff).shiftLeft(5).xor(value);
     for (let j = 0; j < GENERATOR.length; ++j) {
-      if (((topBits >> BigInt(j)) & 1n) === 1n) {
-        checksum = checksum ^ GENERATOR[j];
+      if (topBits.shiftRight(j).and(1).equals(1)) {
+        checksum = checksum.xor(GENERATOR[j]);
       }
     }
   }
-  return checksum ^ 1n;
+  return checksum.xor(1);
 }
 /**
  * Verify that the payload has not been corrupted by checking that the
@@ -385,7 +387,7 @@ function polymod(data) {
 function validChecksum(prefix, payload) {
   const prefixData = concat(prefixToUint5Array(prefix), new Uint8Array(1));
   const checksumData = concat(prefixData, payload);
-  return polymod(checksumData) === 0n;
+  return polymod(checksumData).equals(0);
 }
 /**
  * Returns true if, and only if, the given string contains either uppercase

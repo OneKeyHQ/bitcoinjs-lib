@@ -1,11 +1,7 @@
 import * as assert from 'assert';
-import * as payments from '../src/payments';
-import * as bcrypto from '../src/crypto';
 import { ECPairFactory } from 'ecpair';
 import * as ecc from 'tiny-secp256k1';
-import * as NETWORKS from '../src/networks';
-import { Transaction } from '../src/transaction';
-import { Psbt } from '../src/psbt';
+import { payments, crypto as bcrypto, networks as NETWORKS, Transaction, Psbt } from 'bitcoinjs-lib'
 
 const ECPair = ECPairFactory(ecc);
 
@@ -36,13 +32,13 @@ describe('Psbt for Bitcoin Gold', function () {
         sequence: Transaction.DEFAULT_SEQUENCE,
         witnessUtxo: {
           script: spk,
-          value,
+          value: BigInt(value),
         },
         sighashType: hashTypeForPsbt, // This is how you tell Psbt it is forkid!!!
       })
       .addOutput({
         address: 'GfEHv6hKvAX8HYfFzabMY2eiYDtC9eViqe',
-        value,
+        value: BigInt(value),
       })
       .signInput(0, keyPair)
       .finalizeAllInputs()
