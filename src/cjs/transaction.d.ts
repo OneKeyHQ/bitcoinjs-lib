@@ -23,6 +23,7 @@ export declare class Transaction {
     static readonly SIGHASH_INPUT_MASK = 128;
     static readonly ADVANCED_TRANSACTION_MARKER = 0;
     static readonly ADVANCED_TRANSACTION_FLAG = 1;
+    static readonly MWEB_PEGOUT_FLAG = 8;
     static fromBuffer(buffer: Uint8Array, _NO_STRICT?: boolean): Transaction;
     static fromHex(hex: string): Transaction;
     static isCoinbaseHash(buffer: Uint8Array): boolean;
@@ -34,10 +35,17 @@ export declare class Transaction {
     addInput(hash: Uint8Array, index: number, sequence?: number, scriptSig?: Uint8Array): number;
     addOutput(scriptPubKey: Uint8Array, value: bigint): number;
     hasWitnesses(): boolean;
+    /**
+     * Check if this is a Litecoin MWEB peg-out transaction.
+     * MWEB peg-out transactions have:
+     * - At least one output starting with OP_8 (witness version 8)
+     * - At least one input with empty script (anyone-can-spend from HogEx)
+     */
+    isMwebPegOutTx(): boolean;
     stripWitnesses(): void;
     weight(): number;
     virtualSize(): number;
-    byteLength(_ALLOW_WITNESS?: boolean): number;
+    byteLength(_ALLOW_WITNESS?: boolean, _ALLOW_MWEB?: boolean): number;
     clone(): Transaction;
     /**
      * Hash transaction for signing a specific input.
@@ -50,7 +58,7 @@ export declare class Transaction {
     hashForSignature(inIndex: number, prevOutScript: Uint8Array, hashType: number): Uint8Array;
     hashForWitnessV1(inIndex: number, prevOutScripts: Uint8Array[], values: bigint[], hashType: number, leafHash?: Uint8Array, annex?: Uint8Array): Uint8Array;
     hashForWitnessV0(inIndex: number, prevOutScript: Uint8Array, value: bigint, hashType: number): Uint8Array;
-    getHash(forWitness?: boolean): Uint8Array;
+    getHash(forWitness?: boolean, forMweb?: boolean): Uint8Array;
     getId(): string;
     toBuffer(buffer?: Uint8Array, initialOffset?: number): Uint8Array;
     toHex(): string;

@@ -74,6 +74,7 @@ export class Transaction {
   static readonly SIGHASH_INPUT_MASK = 0x80;
   static readonly ADVANCED_TRANSACTION_MARKER = 0x00;
   static readonly ADVANCED_TRANSACTION_FLAG = 0x01;
+  static readonly MWEB_PEGOUT_FLAG = 0x08;
 
   static fromBuffer(buffer: Uint8Array, _NO_STRICT?: boolean): Transaction {
     const bufferReader = new BufferReader(buffer);
@@ -85,11 +86,18 @@ export class Transaction {
     const flag = bufferReader.readUInt8();
 
     let hasWitnesses = false;
+    let hasMweb = false;
+
     if (
       marker === Transaction.ADVANCED_TRANSACTION_MARKER &&
       flag === Transaction.ADVANCED_TRANSACTION_FLAG
     ) {
       hasWitnesses = true;
+    } else if (
+      marker === Transaction.ADVANCED_TRANSACTION_MARKER &&
+      flag === Transaction.MWEB_PEGOUT_FLAG
+    ) {
+      hasMweb = true;
     } else {
       bufferReader.offset -= 2;
     }
@@ -121,6 +129,11 @@ export class Transaction {
       // was this pointless?
       if (!tx.hasWitnesses())
         throw new Error('Transaction has superfluous witness data');
+    }
+
+    // MWEB peg-out transactions have an extra 0x00 byte before locktime
+    if (hasMweb) {
+      bufferReader.readUInt8();
     }
 
     tx.locktime = bufferReader.readUInt32();
@@ -208,6 +221,22 @@ export class Transaction {
     });
   }
 
+  /**
+   * Check if this is a Litecoin MWEB peg-out transaction.
+   * MWEB peg-out transactions have:
+   * - At least one output starting with OP_8 (witness version 8)
+   * - At least one input with empty script (anyone-can-spend from HogEx)
+   */
+  isMwebPegOutTx(): boolean {
+    return (
+      this.outs.some(output => {
+        // Check if output script starts with OP_8 (0x58)
+        return output.script.length > 0 && output.script[0] === opcodes.OP_8;
+      }) &&
+      this.ins.some(input => input.script.length === 0)
+    );
+  }
+
   stripWitnesses(): void {
     this.ins.forEach(input => {
       input.witness = EMPTY_WITNESS; // Set witness data to an empty array
@@ -215,8 +244,9 @@ export class Transaction {
   }
 
   weight(): number {
-    const base = this.byteLength(false);
-    const total = this.byteLength(true);
+    // Weight calculation excludes MWEB-specific bytes
+    const base = this.byteLength(false, false);
+    const total = this.byteLength(true, false);
     return base * 3 + total;
   }
 
@@ -224,8 +254,9 @@ export class Transaction {
     return Math.ceil(this.weight() / 4);
   }
 
-  byteLength(_ALLOW_WITNESS: boolean = true): number {
+  byteLength(_ALLOW_WITNESS: boolean = true, _ALLOW_MWEB: boolean = true): number {
     const hasWitnesses = _ALLOW_WITNESS && this.hasWitnesses();
+    const hasMweb = _ALLOW_MWEB && !hasWitnesses && this.isMwebPegOutTx();
 
     return (
       (hasWitnesses ? 10 : 8) +
@@ -241,7 +272,8 @@ export class Transaction {
         ? this.ins.reduce((sum, input) => {
             return sum + vectorSize(input.witness);
           }, 0)
-        : 0)
+        : 0) +
+      (hasMweb ? 3 : 0) // marker (1) + flag (1) + extra byte before locktime (1)
     );
   }
 
@@ -608,15 +640,19 @@ export class Transaction {
     return bcrypto.hash256(tbuffer);
   }
 
-  getHash(forWitness?: boolean): Uint8Array {
+  getHash(forWitness?: boolean, forMweb?: boolean): Uint8Array {
     // wtxid for coinbase is always 32 bytes of 0x00
     if (forWitness && this.isCoinbase()) return new Uint8Array(32);
-    return bcrypto.hash256(this.__toBuffer(undefined, undefined, forWitness));
+    // For MWEB transactions, txid is calculated WITHOUT the MWEB marker/flag/extra byte
+    // (similar to how SegWit txid excludes witness data)
+    const allowMweb = forMweb ?? false;
+    return bcrypto.hash256(this.__toBuffer(undefined, undefined, forWitness, allowMweb));
   }
 
   getId(): string {
     // transaction hash's are displayed in reverse order
-    return tools.toHex(reverseBuffer(this.getHash(false)));
+    // txid calculation excludes both witness and MWEB-specific data
+    return tools.toHex(reverseBuffer(this.getHash(false, false)));
   }
 
   toBuffer(buffer?: Uint8Array, initialOffset?: number): Uint8Array {
@@ -646,19 +682,24 @@ export class Transaction {
     buffer?: Uint8Array,
     initialOffset?: number,
     _ALLOW_WITNESS: boolean = false,
+    _ALLOW_MWEB: boolean = true,
   ): Uint8Array {
     if (!buffer)
-      buffer = new Uint8Array(this.byteLength(_ALLOW_WITNESS)) as Uint8Array;
+      buffer = new Uint8Array(this.byteLength(_ALLOW_WITNESS, _ALLOW_MWEB)) as Uint8Array;
 
     const bufferWriter = new BufferWriter(buffer, initialOffset || 0);
 
     bufferWriter.writeUInt32(this.version);
 
     const hasWitnesses = _ALLOW_WITNESS && this.hasWitnesses();
+    const hasMweb = _ALLOW_MWEB && !hasWitnesses && this.isMwebPegOutTx();
 
     if (hasWitnesses) {
       bufferWriter.writeUInt8(Transaction.ADVANCED_TRANSACTION_MARKER);
       bufferWriter.writeUInt8(Transaction.ADVANCED_TRANSACTION_FLAG);
+    } else if (hasMweb) {
+      bufferWriter.writeUInt8(Transaction.ADVANCED_TRANSACTION_MARKER);
+      bufferWriter.writeUInt8(Transaction.MWEB_PEGOUT_FLAG);
     }
 
     bufferWriter.writeVarInt(this.ins.length);
@@ -685,6 +726,11 @@ export class Transaction {
       this.ins.forEach(input => {
         bufferWriter.writeVector(input.witness);
       });
+    }
+
+    // MWEB peg-out transactions have an extra 0x00 byte before locktime
+    if (hasMweb) {
+      bufferWriter.writeUInt8(0);
     }
 
     bufferWriter.writeUInt32(this.locktime);

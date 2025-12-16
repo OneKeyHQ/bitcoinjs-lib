@@ -1,5 +1,5 @@
 {
-  "name": "bitcoinjs-lib",
+  "name": "@onekeyfe/litecoinjs-lib",
   "version": "7.0.0",
   "description": "Client-side Bitcoin JavaScript library",
   "type": "module",
