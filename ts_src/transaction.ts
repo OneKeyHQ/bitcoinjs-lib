@@ -232,8 +232,7 @@ export class Transaction {
       this.outs.some(output => {
         // Check if output script starts with OP_8 (0x58)
         return output.script.length > 0 && output.script[0] === opcodes.OP_8;
-      }) &&
-      this.ins.some(input => input.script.length === 0)
+      }) && this.ins.some(input => input.script.length === 0)
     );
   }
 
@@ -254,7 +253,10 @@ export class Transaction {
     return Math.ceil(this.weight() / 4);
   }
 
-  byteLength(_ALLOW_WITNESS: boolean = true, _ALLOW_MWEB: boolean = true): number {
+  byteLength(
+    _ALLOW_WITNESS: boolean = true,
+    _ALLOW_MWEB: boolean = true,
+  ): number {
     const hasWitnesses = _ALLOW_WITNESS && this.hasWitnesses();
     const hasMweb = _ALLOW_MWEB && !hasWitnesses && this.isMwebPegOutTx();
 
@@ -646,7 +648,9 @@ export class Transaction {
     // For MWEB transactions, txid is calculated WITHOUT the MWEB marker/flag/extra byte
     // (similar to how SegWit txid excludes witness data)
     const allowMweb = forMweb ?? false;
-    return bcrypto.hash256(this.__toBuffer(undefined, undefined, forWitness, allowMweb));
+    return bcrypto.hash256(
+      this.__toBuffer(undefined, undefined, forWitness, allowMweb),
+    );
   }
 
   getId(): string {
@@ -685,7 +689,9 @@ export class Transaction {
     _ALLOW_MWEB: boolean = true,
   ): Uint8Array {
     if (!buffer)
-      buffer = new Uint8Array(this.byteLength(_ALLOW_WITNESS, _ALLOW_MWEB)) as Uint8Array;
+      buffer = new Uint8Array(
+        this.byteLength(_ALLOW_WITNESS, _ALLOW_MWEB),
+      ) as Uint8Array;
 
     const bufferWriter = new BufferWriter(buffer, initialOffset || 0);
 
