@@ -29,6 +29,7 @@ import {
 } from 'bitcoinjs-lib';
 
 import preFixtures from './fixtures/psbt.json';
+import transactionFixtures from './fixtures/transaction.json';
 import taprootFixtures from './fixtures/p2tr.json';
 
 const validator = (
@@ -1252,6 +1253,26 @@ describe(`Psbt`, () => {
       return psbt.finalizeAllInputs();
     }
 
+    it('resolves the prevout of a Litecoin MWEB peg-out transaction', () => {
+      const fixture = transactionFixtures.valid.find(
+        tx => tx.description === 'Litecoin MWEB peg-out transaction',
+      )!;
+      const parent = Transaction.fromHex(fixture.hex);
+      assert.strictEqual(parent.getId(), fixture.id);
+      const prevout = parent.outs[1];
+      const psbt = new Psbt()
+        .addInput({
+          hash: fixture.id,
+          index: 1,
+          nonWitnessUtxo: parent.toBuffer(),
+          witnessUtxo: prevout,
+          finalScriptWitness: Uint8Array.from([0]),
+        })
+        .addOutput({ script: prevout.script, value: prevout.value - 1000n });
+      assert.strictEqual(psbt.getFee(), 1000n);
+      assert.strictEqual(psbt.extractTransaction().outs[0].value, 9996490n);
+    });
+
     it('rejects a conflicting value when signing SegWit', () => {
       const script = payments.p2wpkh({ pubkey: key.publicKey }).output!;
       const parent = makeParent(script);
@@ -1362,6 +1383,10 @@ describe(`Psbt`, () => {
         .addOutput({ script, value: 0n });
 
       assert.throws(() => psbt.getFee(), /Need a Utxo input item for input #0/);
+      assert.throws(
+        () => psbt.getFeeRate(),
+        /Need a Utxo input item for input #0/,
+      );
       assert.throws(
         () => psbt.extractTransaction(),
         /Need a Utxo input item for input #0/,
