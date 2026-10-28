@@ -129,7 +129,6 @@ export function fromBase58Check(address: string): Base58CheckResult {
     const version = tools.readUInt8(payload, 0);
     const hash = payload.slice(1);
 
-
     return { version, hash };
   }
 }

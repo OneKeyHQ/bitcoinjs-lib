@@ -36,10 +36,9 @@ export const isP2TR = isPaymentFactory(payments.p2tr);
  * @returns The script witness as a Buffer.
  */
 export function witnessStackToScriptWitness(witness: Uint8Array[]): Uint8Array {
-  let buffer = new Uint8Array(0);
+  let buffer: Uint8Array = new Uint8Array(0);
 
   function writeSlice(slice: Uint8Array): void {
-    // @ts-ignore
     buffer = tools.concat([buffer, slice]);
   }
 
@@ -47,7 +46,6 @@ export function witnessStackToScriptWitness(witness: Uint8Array[]): Uint8Array {
     const currentLen = buffer.length;
     const varintLen = varuint.encodingLength(i);
 
-    // @ts-ignore
     buffer = tools.concat([buffer, new Uint8Array(varintLen)]);
     varuint.encode(i, buffer, currentLen);
   }

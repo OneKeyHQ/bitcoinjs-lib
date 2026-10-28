@@ -131,7 +131,7 @@ export function p2sh(a: Payment, opts?: PaymentOpts): Payment {
   });
 
   if (opts.validate) {
-    let hash = Uint8Array.from([]);
+    let hash: Uint8Array = Uint8Array.from([]);
     if (a.address) {
       if (_address().version !== network.scriptHash)
         throw new TypeError('Invalid version or Network mismatch');
@@ -142,7 +142,6 @@ export function p2sh(a: Payment, opts?: PaymentOpts): Payment {
     if (a.hash) {
       if (hash.length > 0 && tools.compare(hash, a.hash) !== 0)
         throw new TypeError('Hash mismatch');
-      // @ts-ignore
       else hash = a.hash;
     }
 
@@ -181,7 +180,6 @@ export function p2sh(a: Payment, opts?: PaymentOpts): Payment {
         const hash2 = bcrypto.hash160(redeem.output);
         if (hash.length > 0 && tools.compare(hash, hash2) !== 0)
           throw new TypeError('Hash mismatch');
-        // @ts-ignore
         else hash = hash2;
       }
 

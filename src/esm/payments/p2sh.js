@@ -117,7 +117,6 @@ export function p2sh(a, opts) {
     if (a.hash) {
       if (hash.length > 0 && tools.compare(hash, a.hash) !== 0)
         throw new TypeError('Hash mismatch');
-      // @ts-ignore
       else hash = a.hash;
     }
     if (a.output) {
@@ -152,7 +151,6 @@ export function p2sh(a, opts) {
         const hash2 = bcrypto.hash160(redeem.output);
         if (hash.length > 0 && tools.compare(hash, hash2) !== 0)
           throw new TypeError('Hash mismatch');
-        // @ts-ignore
         else hash = hash2;
       }
       if (redeem.input) {

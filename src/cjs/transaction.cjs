@@ -33,28 +33,16 @@ var __setModuleDefault =
       });
 var __importStar =
   (this && this.__importStar) ||
-  (function () {
-    var ownKeys = function (o) {
-      ownKeys =
-        Object.getOwnPropertyNames ||
-        function (o) {
-          var ar = [];
-          for (var k in o)
-            if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
-          return ar;
-        };
-      return ownKeys(o);
-    };
-    return function (mod) {
-      if (mod && mod.__esModule) return mod;
-      var result = {};
-      if (mod != null)
-        for (var k = ownKeys(mod), i = 0; i < k.length; i++)
-          if (k[i] !== 'default') __createBinding(result, mod, k[i]);
-      __setModuleDefault(result, mod);
-      return result;
-    };
-  })();
+  function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null)
+      for (var k in mod)
+        if (k !== 'default' && Object.prototype.hasOwnProperty.call(mod, k))
+          __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+  };
 Object.defineProperty(exports, '__esModule', { value: true });
 exports.Transaction = void 0;
 const bufferutils_js_1 = require('./bufferutils.cjs');
@@ -369,13 +357,11 @@ class Transaction {
         bufferWriter.writeSlice(txIn.hash);
         bufferWriter.writeUInt32(txIn.index);
       });
-      // @ts-ignore
       hashPrevouts = (0, sha256_1.sha256)(bufferWriter.end());
       bufferWriter = bufferutils_js_1.BufferWriter.withCapacity(
         8 * this.ins.length,
       );
       values.forEach(value => bufferWriter.writeInt64(value));
-      // @ts-ignore
       hashAmounts = (0, sha256_1.sha256)(bufferWriter.end());
       bufferWriter = bufferutils_js_1.BufferWriter.withCapacity(
         prevOutScripts.map(varSliceSize).reduce((a, b) => a + b),
@@ -383,13 +369,11 @@ class Transaction {
       prevOutScripts.forEach(prevOutScript =>
         bufferWriter.writeVarSlice(prevOutScript),
       );
-      // @ts-ignore
       hashScriptPubKeys = (0, sha256_1.sha256)(bufferWriter.end());
       bufferWriter = bufferutils_js_1.BufferWriter.withCapacity(
         4 * this.ins.length,
       );
       this.ins.forEach(txIn => bufferWriter.writeUInt32(txIn.sequence));
-      // @ts-ignore
       hashSequences = (0, sha256_1.sha256)(bufferWriter.end());
     }
     if (!(isNone || isSingle)) {
@@ -404,7 +388,6 @@ class Transaction {
         bufferWriter.writeInt64(out.value);
         bufferWriter.writeVarSlice(out.script);
       });
-      // @ts-ignore
       hashOutputs = (0, sha256_1.sha256)(bufferWriter.end());
     } else if (isSingle && inIndex < this.outs.length) {
       const output = this.outs[inIndex];
@@ -413,7 +396,6 @@ class Transaction {
       );
       bufferWriter.writeInt64(output.value);
       bufferWriter.writeVarSlice(output.script);
-      // @ts-ignore
       hashOutputs = (0, sha256_1.sha256)(bufferWriter.end());
     }
     const spendType = (leafHash ? 2 : 0) + (annex ? 1 : 0);
