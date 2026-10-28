@@ -1,7 +1,13 @@
 import * as assert from 'assert';
 import { ECPairFactory } from 'ecpair';
 import * as ecc from 'tiny-secp256k1';
-import { payments, crypto as bcrypto, networks as NETWORKS, Transaction, Psbt } from 'bitcoinjs-lib'
+import {
+  payments,
+  crypto as bcrypto,
+  networks as NETWORKS,
+  Transaction,
+  Psbt,
+} from 'bitcoinjs-lib';
 
 const ECPair = ECPairFactory(ecc);
 

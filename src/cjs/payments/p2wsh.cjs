@@ -33,28 +33,16 @@ var __setModuleDefault =
       });
 var __importStar =
   (this && this.__importStar) ||
-  (function () {
-    var ownKeys = function (o) {
-      ownKeys =
-        Object.getOwnPropertyNames ||
-        function (o) {
-          var ar = [];
-          for (var k in o)
-            if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
-          return ar;
-        };
-      return ownKeys(o);
-    };
-    return function (mod) {
-      if (mod && mod.__esModule) return mod;
-      var result = {};
-      if (mod != null)
-        for (var k = ownKeys(mod), i = 0; i < k.length; i++)
-          if (k[i] !== 'default') __createBinding(result, mod, k[i]);
-      __setModuleDefault(result, mod);
-      return result;
-    };
-  })();
+  function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null)
+      for (var k in mod)
+        if (k !== 'default' && Object.prototype.hasOwnProperty.call(mod, k))
+          __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+  };
 Object.defineProperty(exports, '__esModule', { value: true });
 exports.p2wsh = p2wsh;
 const sha256_1 = require('@noble/hashes/sha256');
@@ -198,7 +186,6 @@ function p2wsh(a, opts) {
     if (a.hash) {
       if (hash.length > 0 && tools.compare(hash, a.hash) !== 0)
         throw new TypeError('Hash mismatch');
-      // @ts-ignore
       else hash = a.hash;
     }
     if (a.output) {
@@ -241,7 +228,6 @@ function p2wsh(a, opts) {
         const hash2 = (0, sha256_1.sha256)(a.redeem.output);
         if (hash.length > 0 && tools.compare(hash, hash2) !== 0)
           throw new TypeError('Hash mismatch');
-        // @ts-ignore
         else hash = hash2;
       }
       if (a.redeem.input && !bscript.isPushOnly(_rchunks()))

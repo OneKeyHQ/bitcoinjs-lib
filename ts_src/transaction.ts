@@ -389,11 +389,11 @@ export class Transaction {
     const isNone = outputType === Transaction.SIGHASH_NONE;
     const isSingle = outputType === Transaction.SIGHASH_SINGLE;
 
-    let hashPrevouts = EMPTY_BUFFER;
-    let hashAmounts = EMPTY_BUFFER;
-    let hashScriptPubKeys = EMPTY_BUFFER;
-    let hashSequences = EMPTY_BUFFER;
-    let hashOutputs = EMPTY_BUFFER;
+    let hashPrevouts: Uint8Array = EMPTY_BUFFER;
+    let hashAmounts: Uint8Array = EMPTY_BUFFER;
+    let hashScriptPubKeys: Uint8Array = EMPTY_BUFFER;
+    let hashSequences: Uint8Array = EMPTY_BUFFER;
+    let hashOutputs: Uint8Array = EMPTY_BUFFER;
 
     if (!isAnyoneCanPay) {
       let bufferWriter = BufferWriter.withCapacity(36 * this.ins.length);
@@ -401,12 +401,10 @@ export class Transaction {
         bufferWriter.writeSlice(txIn.hash);
         bufferWriter.writeUInt32(txIn.index);
       });
-      // @ts-ignore
       hashPrevouts = sha256(bufferWriter.end());
 
       bufferWriter = BufferWriter.withCapacity(8 * this.ins.length);
       values.forEach(value => bufferWriter.writeInt64(value));
-      // @ts-ignore
       hashAmounts = sha256(bufferWriter.end());
 
       bufferWriter = BufferWriter.withCapacity(
@@ -415,12 +413,10 @@ export class Transaction {
       prevOutScripts.forEach(prevOutScript =>
         bufferWriter.writeVarSlice(prevOutScript),
       );
-      // @ts-ignore
       hashScriptPubKeys = sha256(bufferWriter.end());
 
       bufferWriter = BufferWriter.withCapacity(4 * this.ins.length);
       this.ins.forEach(txIn => bufferWriter.writeUInt32(txIn.sequence));
-      // @ts-ignore
       hashSequences = sha256(bufferWriter.end());
     }
 
@@ -436,7 +432,6 @@ export class Transaction {
         bufferWriter.writeInt64(out.value);
         bufferWriter.writeVarSlice(out.script);
       });
-      // @ts-ignore
       hashOutputs = sha256(bufferWriter.end());
     } else if (isSingle && inIndex < this.outs.length) {
       const output = this.outs[inIndex];
@@ -446,7 +441,6 @@ export class Transaction {
       );
       bufferWriter.writeInt64(output.value);
       bufferWriter.writeVarSlice(output.script);
-      // @ts-ignore
       hashOutputs = sha256(bufferWriter.end());
     }
 
@@ -655,7 +649,6 @@ export class Transaction {
     hashType: number,
     sigVersion?: boolean,
   ): Uint8Array {
-
     v.parse(
       v.tuple([
         types.UInt32Schema,

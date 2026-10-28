@@ -34,13 +34,11 @@ export const isP2TR = isPaymentFactory(payments.p2tr);
 export function witnessStackToScriptWitness(witness) {
   let buffer = new Uint8Array(0);
   function writeSlice(slice) {
-    // @ts-ignore
     buffer = tools.concat([buffer, slice]);
   }
   function writeVarInt(i) {
     const currentLen = buffer.length;
     const varintLen = varuint.encodingLength(i);
-    // @ts-ignore
     buffer = tools.concat([buffer, new Uint8Array(varintLen)]);
     varuint.encode(i, buffer, currentLen);
   }

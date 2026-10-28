@@ -313,11 +313,9 @@ export class Transaction {
         bufferWriter.writeSlice(txIn.hash);
         bufferWriter.writeUInt32(txIn.index);
       });
-      // @ts-ignore
       hashPrevouts = sha256(bufferWriter.end());
       bufferWriter = BufferWriter.withCapacity(8 * this.ins.length);
       values.forEach(value => bufferWriter.writeInt64(value));
-      // @ts-ignore
       hashAmounts = sha256(bufferWriter.end());
       bufferWriter = BufferWriter.withCapacity(
         prevOutScripts.map(varSliceSize).reduce((a, b) => a + b),
@@ -325,11 +323,9 @@ export class Transaction {
       prevOutScripts.forEach(prevOutScript =>
         bufferWriter.writeVarSlice(prevOutScript),
       );
-      // @ts-ignore
       hashScriptPubKeys = sha256(bufferWriter.end());
       bufferWriter = BufferWriter.withCapacity(4 * this.ins.length);
       this.ins.forEach(txIn => bufferWriter.writeUInt32(txIn.sequence));
-      // @ts-ignore
       hashSequences = sha256(bufferWriter.end());
     }
     if (!(isNone || isSingle)) {
@@ -343,7 +339,6 @@ export class Transaction {
         bufferWriter.writeInt64(out.value);
         bufferWriter.writeVarSlice(out.script);
       });
-      // @ts-ignore
       hashOutputs = sha256(bufferWriter.end());
     } else if (isSingle && inIndex < this.outs.length) {
       const output = this.outs[inIndex];
@@ -352,7 +347,6 @@ export class Transaction {
       );
       bufferWriter.writeInt64(output.value);
       bufferWriter.writeVarSlice(output.script);
-      // @ts-ignore
       hashOutputs = sha256(bufferWriter.end());
     }
     const spendType = (leafHash ? 2 : 0) + (annex ? 1 : 0);

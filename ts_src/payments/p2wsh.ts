@@ -147,7 +147,7 @@ export function p2wsh(a: Payment, opts?: PaymentOpts): Payment {
 
   // extended validation
   if (opts.validate) {
-    let hash = Uint8Array.from([]);
+    let hash: Uint8Array = Uint8Array.from([]);
     if (a.address) {
       if (_address().prefix !== network.bech32)
         throw new TypeError('Invalid prefix or Network mismatch');
@@ -161,7 +161,6 @@ export function p2wsh(a: Payment, opts?: PaymentOpts): Payment {
     if (a.hash) {
       if (hash.length > 0 && tools.compare(hash, a.hash) !== 0)
         throw new TypeError('Hash mismatch');
-      // @ts-ignore
       else hash = a.hash;
     }
 
@@ -209,7 +208,6 @@ export function p2wsh(a: Payment, opts?: PaymentOpts): Payment {
         const hash2 = sha256(a.redeem.output);
         if (hash.length > 0 && tools.compare(hash, hash2) !== 0)
           throw new TypeError('Hash mismatch');
-        // @ts-ignore
         else hash = hash2;
       }
 

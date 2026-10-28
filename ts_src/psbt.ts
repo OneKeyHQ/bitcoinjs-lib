@@ -1712,8 +1712,9 @@ function getHashForSig(
     }
   } else if (isP2WPKH(meaningfulScript)) {
     // P2WPKH uses the P2PKH template for prevoutScript when signing
-    const signingScript = payments.p2pkh({ hash: meaningfulScript.slice(2) })
-      .output!;
+    const signingScript = payments.p2pkh({
+      hash: meaningfulScript.slice(2),
+    }).output!;
     if (isForkId && isBTG) {
       hash = unsignedTx.hashForGoldSignature(
         inputIndex,

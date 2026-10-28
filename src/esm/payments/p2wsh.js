@@ -145,7 +145,6 @@ export function p2wsh(a, opts) {
     if (a.hash) {
       if (hash.length > 0 && tools.compare(hash, a.hash) !== 0)
         throw new TypeError('Hash mismatch');
-      // @ts-ignore
       else hash = a.hash;
     }
     if (a.output) {
@@ -188,7 +187,6 @@ export function p2wsh(a, opts) {
         const hash2 = sha256(a.redeem.output);
         if (hash.length > 0 && tools.compare(hash, hash2) !== 0)
           throw new TypeError('Hash mismatch');
-        // @ts-ignore
         else hash = hash2;
       }
       if (a.redeem.input && !bscript.isPushOnly(_rchunks()))
