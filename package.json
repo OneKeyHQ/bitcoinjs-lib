@@ -1,6 +1,6 @@
 {
   "name": "@onekeyfe/bitcoinforksjs-lib",
-  "version": "7.0.0-rc.0",
+  "version": "7.0.0-rc.1",
   "description": "Client-side Bitcoin JavaScript library",
   "type": "module",
   "main": "./src/cjs/index.cjs",
