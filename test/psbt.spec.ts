@@ -24,7 +24,6 @@ import {
   payments,
   Signer,
   SignerAsync,
-  toXOnly,
   Transaction,
 } from 'bitcoinjs-lib';
 
@@ -1307,7 +1306,7 @@ describe(`Psbt`, () => {
     it('rejects a conflicting Taproot prevout', () => {
       initEccLib(ecc);
       const internalKey = bip32.fromSeed(Buffer.alloc(32, 4));
-      const internalPubkey = toXOnly(internalKey.publicKey);
+      const internalPubkey = internalKey.publicKey.slice(1, 33);
       const taprootScript = payments.p2tr({ internalPubkey }).output!;
       const taprootParent = makeParent(taprootScript);
       const taproot = makePsbt(taprootParent, {
@@ -1362,6 +1361,10 @@ describe(`Psbt`, () => {
         .addOutput({ script, value: 0n });
 
       assert.throws(() => psbt.getFee(), /Need a Utxo input item for input #0/);
+      assert.throws(
+        () => psbt.getFeeRate(),
+        /Need a Utxo input item for input #0/,
+      );
       assert.throws(
         () => psbt.extractTransaction(),
         /Need a Utxo input item for input #0/,
